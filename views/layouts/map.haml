@@ -1,0 +1,13 @@
+!!!
+%html{html_attrs}
+  %head
+    %meta{:'http-equiv' => "Content-Type", :content => "text/html; charset=utf-8"}
+    %meta{:name => "lang", :content => "en"}
+    %title Hoodie | Chicago Neighborhood Information
+    %link{:href=>'/stylesheets/application.css', :rel => 'stylesheet', :media => "screen", :type => "text/css"}
+    %script{:type => "text/javascript", :src => "http://maps.googleapis.com/maps/api/js?sensor=false"}
+    %script{:type => "text/javascript", :src => "/javascripts/maps.js"}
+  %body{ :onload => "init()" }
+    = partial :_nav_main
+    = yield
+    = partial :_analytics
