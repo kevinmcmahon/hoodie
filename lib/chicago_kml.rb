@@ -1,6 +1,6 @@
 module ChicagoKml
 
- attr_accessor :chicago, :wards, :hoods, :police
+ attr_accessor :chicago, :wards, :hoods, :police, :ushouse, :ilsenate
  
  def self.get_chicago_boundary
    if @chicago.nil?
@@ -28,6 +28,20 @@ module ChicagoKml
      @police = MapHacks.parse_police(File.read('./kml/ChicagoPoliceDistricts.kml'))
    end
    @police
+ end
+ 
+ def self.get_ushouse
+   if @ushouse.nil?
+     @ushouse = MapHacks.parse_ushouse(File.read('./kml/IL_Congress.kml'))
+   end
+   @ushouse
+ end
+ 
+ def self.get_ilsenate
+   if @ilsenate.nil?
+     @ilsenate = MapHacks.parse_ilsenate(File.read('./kml/IL_Senate.kml'))
+   end
+   @ilsenate
  end
  
 end

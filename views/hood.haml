@@ -1,4 +1,19 @@
-%h2= "#{@hood_result['formatted_address']}"
-%h1= "Ward #{@hood_result['ward'].name}"
-%h1= "#{@hood_result['hood'].name}"
-#map_canvas
+.row
+  .span10
+    #map_canvas
+  .span4
+    %h3= "Neighborhood"
+    %h1= "#{@hood_result['hood'].name}"
+    %h3= "Ward"
+    %h1= "#{@hood_result['ward'].name}"
+    %h3= "Police District"
+    %h1= "#{@hood_result['police'].name}"
+    %h3= "US House District"
+    %h1= "#{@hood_result['ushouse'].name}"
+    %h3= "IL Senate"
+    %h1= "#{@hood_result['ilsenate'].name}"
+:javascript
+  $(function(){
+      Hoodie.initWithCoords(#{@hood_result['lat']}, #{@hood_result['lng']});
+      Hoodie.showNeighborhood("#{@hood_result['hood'].name}");
+  });

@@ -32,6 +32,8 @@ module MapHacks
         ward = ''
         hood = ''
         police = ''
+        ushouse = ''
+        ilsenate = ''
         
         ChicagoKml.get_ward_boundary.each do |w|
           if w.region.contains_point?(point)
@@ -57,12 +59,29 @@ module MapHacks
           end
         end
         
+        ChicagoKml.get_ushouse.each do |uh|
+          if uh.region.contains_point?(point)
+            puts "    US Congressional District is #{uh.name}"
+            ushouse = uh
+            break
+          end
+        end
+        
+        ChicagoKml.get_ilsenate.each do |is|
+          if is.region.contains_point?(point)
+            puts "    IL Senate is #{is.name}"
+            ilsenate = is
+            break
+          end
+        end
+        
       else
         puts query + " is not in Chicago"
       end
 
       return {'ward' => ward, 'hood' => hood, 'formatted_address' => address['formatted_address'],
-        'lat' => location['lat'], 'lng' => location['lng'], 'police' => police}
+        'lat' => location['lat'], 'lng' => location['lng'], 'police' => police,
+        'ushouse' => ushouse, 'ilsenate' => ilsenate}
     end
     
     def self.parse_wards(string)
@@ -91,6 +110,26 @@ module MapHacks
         region = parse_kml(placemark.to_s)
         pm = Nokogiri::XML(placemark.to_s)
         name = pm.xpath('//ExtendedData/SchemaData/SimpleData[@name="DIST_LABEL"]').text
+        MapHacks::Placemark.new(name,region)
+      end
+    end
+    
+    def self.parse_ushouse(string)
+      doc = Nokogiri::XML(string)
+      placemarks = doc.xpath('//kml:Placemark','kml' =>'http://www.opengis.net/kml/2.2').map do |placemark|
+        region = parse_kml(placemark.to_s)
+        pm = Nokogiri::XML(placemark.to_s)
+        name = pm.xpath('//ExtendedData/SchemaData[@schemaUrl="#IL_Congress"]/SimpleData[@name="DISTRICT"]').text
+        MapHacks::Placemark.new(name,region)
+      end
+    end
+    
+    def self.parse_ilsenate(string)
+      doc = Nokogiri::XML(string)
+      placemarks = doc.xpath('//kml:Placemark','kml' =>'http://www.opengis.net/kml/2.2').map do |placemark|
+        region = parse_kml(placemark.to_s)
+        pm = Nokogiri::XML(placemark.to_s)
+        name = pm.xpath('//ExtendedData/SchemaData[@schemaUrl="#IL_Senate"]/SimpleData[@name="DISTRICT"]').text
         MapHacks::Placemark.new(name,region)
       end
     end

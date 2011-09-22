@@ -6,14 +6,20 @@ var Hoodie = {
 	},
 
 	initWithCoords: function(lat,lng) {
-		var chicago = new google.maps.LatLng(lat,lng);
-		  var myOptions = {
-		    zoom: 14,
-		    center: chicago,
-		    mapTypeId: google.maps.MapTypeId.ROADMAP
-		  }
+		var location = new google.maps.LatLng(lat,lng);
+		var myOptions = {
+			zoom: 14,
+			center: location,
+			mapTypeId: google.maps.MapTypeId.ROADMAP
+		};
 
-		  this.map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+		this.map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+		marker = new google.maps.Marker({
+			map:this.map,
+			draggable:false,
+			animation: google.maps.Animation.DROP,
+			position: location
+		});
 	},
 	
 	showNeighborhood: function(hoodName) {
