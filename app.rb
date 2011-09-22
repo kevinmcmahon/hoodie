@@ -20,7 +20,11 @@ get '/' do
 end
 
 get '/about' do
-  haml :about, :layout => :'layouts/application'
+  haml :about, :layout => :'layouts/page'
+end
+
+get '/contact' do
+  haml :contact, :layout => :'layouts/page'
 end
 
 post '/hood' do
