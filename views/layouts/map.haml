@@ -5,9 +5,17 @@
     %meta{:name => "lang", :content => "en"}
     %title Hoodie | Chicago Neighborhood Information
     %link{:href=>'/stylesheets/application.css', :rel => 'stylesheet', :media => "screen", :type => "text/css"}
+    %script{:type => "text/javascript", :src => "http://code.jquery.com/jquery-1.5.min.js"}
     %script{:type => "text/javascript", :src => "http://maps.googleapis.com/maps/api/js?sensor=false"}
     %script{:type => "text/javascript", :src => "/javascripts/maps.js"}
-  %body{ :onload => "init()" }
-    = partial :_nav_main
+    %script{:type => "text/javascript", :src => "http://use.typekit.com/tee8gwn.js"}
+    %script{:type => "text/javascript"}
+      try{Typekit.load();}catch(e){}
+    :javascript
+      $(function(){
+          Hoodie.initWithCoords(#{@hood_result['lat']}, #{@hood_result['lng']});
+          Hoodie.showNeighborhood("#{@hood_result['hood'].name}");
+      });
+  %body
     = yield
     = partial :_analytics
