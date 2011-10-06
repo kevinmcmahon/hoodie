@@ -22,23 +22,29 @@ module MapHacks
     
     def self.processQuery(query)
       
-      address = MapUtils.address_geocode(query) 
+      address = MapUtils.address_geocode(query)
+      
+      if address.nil?
+        return {'status' => :notfound}
+      end
+      
       location = address['location']
       point = BorderPatrol::Point.new(location['lng'],location['lat'])
 
       if ChicagoKml.get_chicago_boundary.contains_point?(point)
         puts query + " is in Chicago."
 
-        ward = ''
-        hood = ''
-        police = ''
-        ushouse = ''
-        ilsenate = ''
+        ward = 'N/A'
+        hood = 'N/A'
+        police = 'N/A'
+        ushouse = 'N/A'
+        ilsenate = 'N/A'
+        response = {}
         
         ChicagoKml.get_ward_boundary.each do |w|
           if w.region.contains_point?(point)
             puts "    Ward #{w.name}"
-            ward = w
+            ward = w.name
             break
           end 
         end
@@ -46,7 +52,7 @@ module MapHacks
         ChicagoKml.get_hoods_boundary.each do |h|
           if h.region.contains_point?(point)
             puts "    Neighborhood is #{h.name}"
-            hood = h
+            hood = h.name
             break
           end
         end
@@ -54,7 +60,7 @@ module MapHacks
         ChicagoKml.get_police_boundary.each do |p|
           if p.region.contains_point?(point)
             puts "    Police District is #{p.name}"
-            police = p
+            police = p.name
             break
           end
         end
@@ -62,7 +68,7 @@ module MapHacks
         ChicagoKml.get_ushouse.each do |uh|
           if uh.region.contains_point?(point)
             puts "    US Congressional District is #{uh.name}"
-            ushouse = uh
+            ushouse = uh.name
             break
           end
         end
@@ -70,18 +76,19 @@ module MapHacks
         ChicagoKml.get_ilsenate.each do |is|
           if is.region.contains_point?(point)
             puts "    IL Senate is #{is.name}"
-            ilsenate = is
+            ilsenate = is.name
             break
           end
         end
-        
+        response = {'status' => :found, 'ward' => ward, 'hood' => hood, 'formatted_address' => address['formatted_address'],
+          'lat' => location['lat'], 'lng' => location['lng'], 'police' => police,
+          'ushouse' => ushouse, 'ilsenate' => ilsenate}
       else
         puts query + " is not in Chicago"
+        response = {'status' => :notfound}
       end
 
-      return {'ward' => ward, 'hood' => hood, 'formatted_address' => address['formatted_address'],
-        'lat' => location['lat'], 'lng' => location['lng'], 'police' => police,
-        'ushouse' => ushouse, 'ilsenate' => ilsenate}
+      return response
     end
     
     def self.parse_wards(string)

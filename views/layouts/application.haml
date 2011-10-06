@@ -8,9 +8,6 @@
     %link{:href=>'/stylesheets/layout.min.css', :media => "screen", :rel => 'stylesheet', :type => "text/css"}
     %script{:type => "text/javascript", :src => "http://code.jquery.com/jquery-1.5.min.js"}
     %script{:type => "text/javascript", :src => "/javascripts/lib/modernizr-1.6.min.js"}
-    %script{:type => "text/javascript", :src => "http://use.typekit.com/tee8gwn.js"}
-    :javascript
-      try{Typekit.load();}catch(e){}
   %body
     = partial :_nav_main
     .container
@@ -19,6 +16,9 @@
           %h1 
             Welcome to Hoodie 
             %small Chicago neighborhood information
+        - if flash[:error]
+          %p
+            = flash[:error]
         = yield
       %footer
         %p &copy; Kevin McMahon 2011

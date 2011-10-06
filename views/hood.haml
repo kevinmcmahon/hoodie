@@ -3,17 +3,17 @@
     #map_canvas
   .span4
     %h3= "Neighborhood"
-    %h1= "#{@hood_result['hood'].name}"
+    %h1= "#{@hood_result['hood']}"
     %h3= "Ward"
-    %h1= "#{@hood_result['ward'].name}"
+    %h1= "#{@hood_result['ward']}"
     %h3= "Police District"
-    %h1= "#{@hood_result['police'].name}"
+    %h1= "#{@hood_result['police']}"
     %h3= "US House District"
-    %h1= "#{@hood_result['ushouse'].name}"
+    %h1= "#{@hood_result['ushouse']}"
     %h3= "IL Senate"
-    %h1= "#{@hood_result['ilsenate'].name}"
+    %h1= "#{@hood_result['ilsenate']}"
 :javascript
   $(function(){
       Hoodie.initWithCoords(#{@hood_result['lat']}, #{@hood_result['lng']});
-      Hoodie.showNeighborhood("#{@hood_result['hood'].name}");
+      Hoodie.showNeighborhood("#{@hood_result['hood']}");
   });

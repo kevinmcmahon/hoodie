@@ -18,6 +18,10 @@ module MapUtils
     if result.has_key? 'Error'
       raise "web service error"
     end
+    
+    if result['status'] == 'ZERO_RESULTS'
+      return nil
+    end
     return {'location' => result['results'][0]['geometry']['location'], 'formatted_address' => result['results'][0]['formatted_address']}
   end
 end
