@@ -5,6 +5,7 @@ require 'haml'
 require 'border_patrol'
 require 'pony'
 require 'json'
+require 'sinatra/config_file'
 
 # Helpers
 require './lib/render_partial'
@@ -18,6 +19,8 @@ set :root, File.dirname(__FILE__)
 set :views, 'views'
 set :public, 'public'
 set :haml, {:format => :html5} # default Haml format is :xhtml
+
+config_file "settings.yml"
 
 # Application routes
 get '/?' do
@@ -62,25 +65,25 @@ get '/lookup/:address' do
 end
 
 post '/feedback' do
-  Pony.mail :to => 'feedback@hoodiechicago.com',
+  Pony.mail :to => settings.mailaddress,
             :from => params[:email],
             :subject => "Web Feedback",
             :body => erb(:feedback_email, :layout => false)
           
   Pony.mail :to => params[:email],
-            :from => 'feedback@hoodiechicago.com',
+            :from => settings.mailaddress,
             :via => :smtp, 
             :via_options => {
               :address => 'smtp.gmail.com',
               :port => '587',
               :enable_starttls_auto => true,
-              :user_name => 'feedback@hoodiechicago.com',
-              :password => '3sletbWe',
+              :user_name => settings.mailaddress,
+              :password => settings.mailpassword,
               :authentication => :plain, # :plain, :login, :cram_md5, no auth by default
               :domain => "HELO", # don't know exactly what should be here
             },
             :subject => "Thanks for the feedback.",
             :body => erb(:reply_email, :layout => false)
   @title = 'Thanks!'
-  haml :thanks, :page => :'layouts/application'
+  haml :thanks, :layout => :'layouts/page'
 end

@@ -2,13 +2,13 @@
   .span12.push2
     %form{ :action => "/feedback", :method => "post"}
       %fieldset
-        %label{:for => "name"} Name:
+        %label{:for => "name"} Name 
         %input{:type => "text", :name => "name", :class => "text"}
       %fieldset
-        %label{:for => "email"} Email:
+        %label{:for => "email"} Email 
         %input{:type => "text", :name => "email", :class => "text"}
       %fieldset
-        %label{:for => "body"} Comment/Issue:
-        %textarea{:name => "body", :rows => "12" }
+        %label{:for => "body"} Message 
+        %textarea{:name => "message", :rows => "12" }
       %fieldset
         %input{:type => "submit", :value => "Send Feedback", :class => "button"}
