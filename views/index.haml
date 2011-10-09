@@ -1,8 +1,7 @@
-%h1 Welcome to Hoodie
-%form{ :action => "/hood", :method => "post"}
-  %fieldset
-    %ol
-      %li
-        %label{:for => "address"} Address:
-        %input{:type => "text", :name => "address", :class => "text"}
-    %input{:type => "submit", :value => "Submit", :class => "button"}
+.row
+  .span14
+    %form{ :id => "address_form", :action => "/", :method => "post"}
+      %fieldset
+        %input{:type => "text", :name => "address", :class => "text", :placeholder => "Enter a Chicago Address"}
+      %fieldset    
+        %input{:type => "submit", :value => "Look Up", :class => "button"}
