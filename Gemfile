@@ -10,5 +10,9 @@ gem "border_patrol"
 gem "json_pure"
 gem "pony"
 gem "sinatra-flash"
+<<<<<<< HEAD
 gem 'data_mapper'
 gem 'dm-postgres-adapter'
+=======
+gem "rdiscount"
+>>>>>>> 1111941822a87a8fa8baa4580ada1f2d580654c2
