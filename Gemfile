@@ -10,3 +10,5 @@ gem "border_patrol"
 gem "json_pure"
 gem "pony"
 gem "sinatra-flash"
+gem 'data_mapper'
+gem 'dm-postgres-adapter'
