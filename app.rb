@@ -21,8 +21,7 @@ set :views, 'views'
 set :public, 'public'
 set :haml, {:format => :html5} # default Haml format is :xhtml
 
-DataMapper::setup(:default, 'postgres://kmcmahon:0c791fd488@beta.spacialdb.com:9999/spacialdb_1321928742fe_kmcmahon')
-#   "postgres://localhost:5432/chicago_db")
+DataMapper::setup(:default, ENV['DATABASE_URL'] || "postgres://localhost:5432/chicago_db")
     
 config_file "settings.yml"
 
