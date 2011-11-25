@@ -15,4 +15,3 @@ gem 'dm-postgres-adapter'
 gem "sinatra-config-file"
 gem "rdiscount"
 gem 'heroku'
-
