@@ -2,7 +2,6 @@ require 'rubygems'
 require 'nokogiri'
 require 'border_patrol'
 require './lib/map_utils'
-require './lib/chicago_kml'
 
 module MapHacks
     class InsufficientPointsToActuallyFormAPolygonError < ArgumentError; end
@@ -20,6 +19,54 @@ module MapHacks
         end
     end
     
+    def self.in_chicago?(location)
+      sql = "SELECT EXISTS(SELECT *
+       FROM boundary 
+       WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{location['lng']} #{location['lat']})', 4326)));"
+
+       DataMapper.repository(:default).adapter.select sql
+    end
+    
+    def self.getHood(location)
+       sql =  "SELECT pri_neigh AS neighborhood 
+       FROM hoods 
+       WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{location['lng']} #{location['lat']})', 4326));"
+       puts sql
+       DataMapper.repository(:default).adapter.select sql
+    end
+    
+    def self.getWard(location)
+       sql =  "SELECT ward 
+       FROM wards 
+       WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{location['lng']} #{location['lat']})', 4326));"
+       puts sql
+       DataMapper.repository(:default).adapter.select sql
+    end
+    
+    def self.getPoliceDistrict(location)
+      sql = "SELECT police_stations.name AS district FROM police_stations
+      INNER JOIN police_districts
+      ON police_districts.dist_num = police_stations.descriptio
+      WHERE ST_Contains(police_districts.the_geom,ST_GeomFromText('POINT(#{location['lng']} #{location['lat']})', 4326));"
+
+       DataMapper.repository(:default).adapter.select sql
+    end
+    
+    def self.getIlCongress(location)
+      sql = "SELECT district FROM il_congress
+            WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{location['lng']} #{location['lat']})', 4326));"      
+
+      DataMapper.repository(:default).adapter.select sql
+    end
+
+    def self.getIlSenate(location)
+      sql = "SELECT district FROM il_senate
+      WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{location['lng']} #{location['lat']})', 4326));"
+
+      DataMapper.repository(:default).adapter.select sql
+    end
+    
+    
     def self.processQuery(query)
       
       address = MapUtils.address_geocode(query)
@@ -29,57 +76,16 @@ module MapHacks
       end
       
       location = address['location']
-      point = BorderPatrol::Point.new(location['lng'],location['lat'])
-
-      if ChicagoKml.get_chicago_boundary.contains_point?(point)
+      
+      if self.in_chicago?(location)
         puts query + " is in Chicago."
 
-        ward = 'N/A'
-        hood = 'N/A'
-        police = 'N/A'
-        ushouse = 'N/A'
-        ilsenate = 'N/A'
-        response = {}
+        ward = self.getWard(location)
+        hood = self.getHood(location)
+        police = self.getPoliceDistrict(location)
+        ushouse = self.getIlCongress(location)
+        ilsenate = self.getIlSenate(location)
         
-        ChicagoKml.get_ward_boundary.each do |w|
-          if w.region.contains_point?(point)
-            puts "    Ward #{w.name}"
-            ward = w.name
-            break
-          end 
-        end
-
-        ChicagoKml.get_hoods_boundary.each do |h|
-          if h.region.contains_point?(point)
-            puts "    Neighborhood is #{h.name}"
-            hood = h.name
-            break
-          end
-        end
-        
-        ChicagoKml.get_police_boundary.each do |p|
-          if p.region.contains_point?(point)
-            puts "    Police District is #{p.name}"
-            police = p.name
-            break
-          end
-        end
-        
-        ChicagoKml.get_ushouse.each do |uh|
-          if uh.region.contains_point?(point)
-            puts "    US Congressional District is #{uh.name}"
-            ushouse = uh.name
-            break
-          end
-        end
-        
-        ChicagoKml.get_ilsenate.each do |is|
-          if is.region.contains_point?(point)
-            puts "    IL Senate is #{is.name}"
-            ilsenate = is.name
-            break
-          end
-        end
         response = {'status' => :found, 'ward' => ward, 'hood' => hood, 'formatted_address' => address['formatted_address'],
           'lat' => location['lat'], 'lng' => location['lng'], 'police' => police,
           'ushouse' => ushouse, 'ilsenate' => ilsenate}
@@ -89,80 +95,5 @@ module MapHacks
       end
 
       return response
-    end
-    
-    def self.parse_wards(string)
-      doc = Nokogiri::XML(string)
-      placemarks = doc.xpath('//kml:Placemark','kml' =>'http://www.opengis.net/kml/2.2').map do |placemark|
-        region = parse_kml(placemark.to_s)
-        pm = Nokogiri::XML(placemark.to_s)
-        name = pm.xpath('//name').text
-        MapHacks::Placemark.new(name,region)
-      end
-    end
-    
-    def self.parse_hoods(string)
-      doc = Nokogiri::XML(string)
-      placemarks = doc.xpath('//kml:Placemark','kml' =>'http://www.opengis.net/kml/2.2').map do |placemark|
-        region = parse_kml(placemark.to_s)
-        pm = Nokogiri::XML(placemark.to_s)
-        name = pm.xpath('//Data/value').text
-        MapHacks::Placemark.new(name,region)
-      end
-    end
-    
-    def self.parse_police(string)
-      doc = Nokogiri::XML(string)
-      placemarks = doc.xpath('//kml:Placemark','kml' =>'http://www.opengis.net/kml/2.2').map do |placemark|
-        region = parse_kml(placemark.to_s)
-        pm = Nokogiri::XML(placemark.to_s)
-        name = pm.xpath('//ExtendedData/SchemaData/SimpleData[@name="DIST_LABEL"]').text
-        MapHacks::Placemark.new(name,region)
-      end
-    end
-    
-    def self.parse_ushouse(string)
-      doc = Nokogiri::XML(string)
-      placemarks = doc.xpath('//kml:Placemark','kml' =>'http://www.opengis.net/kml/2.2').map do |placemark|
-        region = parse_kml(placemark.to_s)
-        pm = Nokogiri::XML(placemark.to_s)
-        name = pm.xpath('//ExtendedData/SchemaData[@schemaUrl="#IL_Congress"]/SimpleData[@name="DISTRICT"]').text
-        MapHacks::Placemark.new(name,region)
-      end
-    end
-    
-    def self.parse_ilsenate(string)
-      doc = Nokogiri::XML(string)
-      placemarks = doc.xpath('//kml:Placemark','kml' =>'http://www.opengis.net/kml/2.2').map do |placemark|
-        region = parse_kml(placemark.to_s)
-        pm = Nokogiri::XML(placemark.to_s)
-        name = pm.xpath('//ExtendedData/SchemaData[@schemaUrl="#IL_Senate"]/SimpleData[@name="DISTRICT"]').text
-        MapHacks::Placemark.new(name,region)
-      end
-    end
-    
-    private 
-    def self.parse_kml(string)
-       doc = Nokogiri::XML(string)
-       polygons = doc.xpath('//Polygon').map do |polygon_kml|
-         begin 
-           parse_kml_polygon_data(polygon_kml.to_s)
-         rescue InsufficientPointsToActuallyFormAPolygonError => e
-           puts "Problem with Polygon : #{polygon_kml}"
-         end
-       end
-       BorderPatrol::Region.new(polygons)
-     end
-      
-    private
-    def self.parse_kml_polygon_data(string)
-      doc = Nokogiri::XML(string)
-      coordinates = doc.xpath("//coordinates").text.strip.split(" ")
-
-      points = coordinates.map do |coord|
-        x, y, z = coord.strip.split(',')
-        BorderPatrol::Point.new(x.to_f, y.to_f)
-      end
-      BorderPatrol::Polygon.new(points)
     end
 end

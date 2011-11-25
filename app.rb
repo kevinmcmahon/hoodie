@@ -5,6 +5,7 @@ require 'haml'
 require 'border_patrol'
 require 'pony'
 require 'json'
+require 'data_mapper'
 
 # Helpers
 require './lib/render_partial'
@@ -19,6 +20,10 @@ set :views, 'views'
 set :public, 'public'
 set :haml, {:format => :html5} # default Haml format is :xhtml
 
+
+DataMapper::setup(:default, 'postgres://kmcmahon:0c791fd488@beta.spacialdb.com:9999/spacialdb_1321928742fe_kmcmahon')
+#   "postgres://localhost:5432/chicago_db")
+    
 # Application routes
 get '/?' do
   haml :index, :layout => :'layouts/application'
@@ -36,6 +41,7 @@ end
 
 post '/' do
   @address = params[:address]
+  
   @hood_result = MapHacks.processQuery(@address)
   if @hood_result['status'] == :found
     haml :hood, :layout => :'layouts/map'
@@ -47,9 +53,10 @@ end
 
 get '/lookup/:address' do
   @address = params[:address]
-
+  @location = MapUtils.address_geocode(@address)
+   
   @hood_result = MapHacks.processQuery(@address)
-  
+
   if @hood_result['status'] == :found  
     content_type :json
     { :status => 'success', :ward => @hood_result['ward'], :hood => @hood_result['hood'],
