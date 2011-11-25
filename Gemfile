@@ -12,6 +12,7 @@ gem "pony"
 gem "sinatra-flash"
 gem 'data_mapper'
 gem 'dm-postgres-adapter'
+gem "sinatra-config-file"
 gem "rdiscount"
 gem 'heroku'
 
