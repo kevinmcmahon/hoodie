@@ -69,6 +69,24 @@ get '/lookup/:address' do
   end
 end
 
+get '/lookup' do
+  @lat = params['lat']
+  @lng = params['lng']
+  puts 'Latitude  : ' + @lat
+  puts 'Longitude : ' + @lng
+  
+  @hood_result = MapHacks.processLatLong(@lat,@lng)
+  if @hood_result['status'] == :found  
+    content_type :json
+    { :status => 'success', :ward => @hood_result['ward'], :hood => @hood_result['hood'],
+      :address => @hood_result['formatted_address'], :lat => @hood_result['lat'].to_s, :long => @hood_result['lng'].to_s, 
+      :police => @hood_result['police'], :ushouse => @hood_result['ushouse'], :ilsenate => @hood_result['ilsenate']}.to_json
+  else
+    content_type :json
+    {:status => 'failed' }.to_json
+  end
+end
+
 post '/feedback' do
   Pony.mail :to => settings.mailaddress,
             :from => params[:email],

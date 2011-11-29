@@ -1,96 +1,93 @@
 require 'rubygems'
 require 'nokogiri'
-require 'border_patrol'
+require 'geocoder'
 require './lib/map_utils'
 
 module MapHacks
-    class InsufficientPointsToActuallyFormAPolygonError < ArgumentError; end
-    class InsufficientPlacemarkArguments < ArgumentError; end
+    
+    def self.in_chicago?(lat,lng)
+      sql = 
+      "SELECT EXISTS(SELECT * FROM boundary WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326)));"
 
-    class Placemark
-        attr_accessor :name
-        attr_accessor :region
-
-        def initialize(*args)
-          args.flatten!
-          args.uniq!
-          raise InsufficientPlacemarkArguments unless args.size == 2
-          @name, @region = args
-        end
+      result = DataMapper.repository(:default).adapter.select sql
+      result[0]
     end
     
-    def self.in_chicago?(location)
-      sql = "SELECT EXISTS(SELECT *
-       FROM boundary 
-       WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{location['lng']} #{location['lat']})', 4326)));"
+    def self.getHood(lat,lng)
+      sql =  
+      "SELECT pri_neigh AS neighborhood 
+      FROM hoods 
+      WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326));"
 
-       DataMapper.repository(:default).adapter.select sql
+      result = DataMapper.repository(:default).adapter.select sql
+      result[0]
     end
     
-    def self.getHood(location)
-       sql =  "SELECT pri_neigh AS neighborhood 
-       FROM hoods 
-       WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{location['lng']} #{location['lat']})', 4326));"
-       puts sql
-       DataMapper.repository(:default).adapter.select sql
+    def self.getWard(lat,lng)
+      sql =  "SELECT ward FROM wards 
+      WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326));"
+
+      result = DataMapper.repository(:default).adapter.select sql
+      result[0]
     end
     
-    def self.getWard(location)
-       sql =  "SELECT ward 
-       FROM wards 
-       WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{location['lng']} #{location['lat']})', 4326));"
-       puts sql
-       DataMapper.repository(:default).adapter.select sql
+    def self.getPoliceDistrict(lat,lng)
+      sql = 
+      "SELECT police_stations.name AS district FROM police_stations
+       INNER JOIN police_districts
+       ON police_districts.dist_num = police_stations.descriptio
+       WHERE ST_Contains(police_districts.the_geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326));"
+
+       result = DataMapper.repository(:default).adapter.select sql
+       result[0]
     end
     
-    def self.getPoliceDistrict(location)
-      sql = "SELECT police_stations.name AS district FROM police_stations
-      INNER JOIN police_districts
-      ON police_districts.dist_num = police_stations.descriptio
-      WHERE ST_Contains(police_districts.the_geom,ST_GeomFromText('POINT(#{location['lng']} #{location['lat']})', 4326));"
+    def self.getIlCongress(lat,lng)
+      sql = 
+      "SELECT district FROM il_congress
+       WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326));"
 
-       DataMapper.repository(:default).adapter.select sql
-    end
-    
-    def self.getIlCongress(location)
-      sql = "SELECT district FROM il_congress
-            WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{location['lng']} #{location['lat']})', 4326));"      
-
-      DataMapper.repository(:default).adapter.select sql
+       result = DataMapper.repository(:default).adapter.select sql 
+       result[0]
     end
 
-    def self.getIlSenate(location)
+    def self.getIlSenate(lat,lng)
       sql = "SELECT district FROM il_senate
-      WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{location['lng']} #{location['lat']})', 4326));"
+             WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326));"
 
-      DataMapper.repository(:default).adapter.select sql
+      result = DataMapper.repository(:default).adapter.select sql
+      result[0]
     end
-    
     
     def self.processQuery(query)
-      
-      address = MapUtils.address_geocode(query)
-      
-      if address.nil?
-        return {'status' => :notfound}
-      end
-      
-      location = address['location']
-      
-      if self.in_chicago?(location)
-        puts query + " is in Chicago."
+      result = Geocoder.search(query)
+      self.processAddress(result)
+    end
+    
+    def self.processLatLong(lat,lng) 
+      result = Geocoder.search([lat,lng])
+      self.processAddress(result)
+    end
+    
+    def self.processAddress(result)
+      formatted_address = result[0].formatted_address
+      lat = result[0].latitude
+      lng = result[0].longitude
 
-        ward = self.getWard(location)
-        hood = self.getHood(location)
-        police = self.getPoliceDistrict(location)
-        ushouse = self.getIlCongress(location)
-        ilsenate = self.getIlSenate(location)
-        
-        response = {'status' => :found, 'ward' => ward, 'hood' => hood, 'formatted_address' => address['formatted_address'],
-          'lat' => location['lat'], 'lng' => location['lng'], 'police' => police,
+      if self.in_chicago?(lat,lng)
+        puts "#{formatted_address} is in Chicago."
+
+        ward = self.getWard(lat,lng)
+        hood = self.getHood(lat,lng)
+        police = self.getPoliceDistrict(lat,lng)
+        ushouse = self.getIlCongress(lat,lng).sub! /\A0+/, ''
+        ilsenate = self.getIlSenate(lat,lng)
+
+        response = {'status' => :found, 'ward' => ward, 'hood' => hood, 'formatted_address' => formatted_address,
+          'lat' => lat, 'lng' => lng, 'police' => police,
           'ushouse' => ushouse, 'ilsenate' => ilsenate}
       else
-        puts query + " is not in Chicago"
+        puts "#{formatted_address} is NOT in Chicago."
         response = {'status' => :notfound}
       end
 
