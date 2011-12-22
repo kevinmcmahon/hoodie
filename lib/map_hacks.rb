@@ -79,7 +79,7 @@ module MapHacks
       if self.in_chicago?(lat,lng)
         puts "#{formatted_address} is in Chicago."
 
-        ward = self.getWard(lat,lng)[0]['ward']
+        ward = self.getWard(lat,lng)[0]
         hood = self.getHood(lat,lng)
         police = self.getPoliceDistrict(lat,lng)
         ushouse = self.getIlCongress(lat,lng).sub! /\A0+/, ''
