@@ -79,9 +79,9 @@ get '/lookupward' do
   puts 'Longitude : ' + @lng
   
   @ward = MapHacks.getWard(@lat,@lng)
-  ap @ward
+
   content_type :json
-  { ward:@ward['ward'],alderman:@ward['alderman']}.to_json
+  { :ward => @ward['ward'], :alderman => @ward['alderman']}.to_json
 end
 
 get '/lookup' do
