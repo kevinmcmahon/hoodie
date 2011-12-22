@@ -17,15 +17,17 @@ module MapHacks
       sql =  
       "SELECT pri_neigh AS neighborhood 
       FROM hoods 
-      WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326));"
+      WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326))
+      LIMIT 1;"
 
       result = DataMapper.repository(:default).adapter.select sql
       result[0]
     end
     
     def self.getWard(lat,lng)
-      sql =  "SELECT ward FROM wards 
-      WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326));"
+      sql =  "SELECT ward, alderman, ward_phone, hall_phone, address AS ward_address, hall_offic AS hall_address FROM wards 
+      WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326))
+      LIMIT 1;"
 
       result = DataMapper.repository(:default).adapter.select sql
       result[0]
@@ -77,7 +79,7 @@ module MapHacks
       if self.in_chicago?(lat,lng)
         puts "#{formatted_address} is in Chicago."
 
-        ward = self.getWard(lat,lng)
+        ward = self.getWard(lat,lng)[0]['ward']
         hood = self.getHood(lat,lng)
         police = self.getPoliceDistrict(lat,lng)
         ushouse = self.getIlCongress(lat,lng).sub! /\A0+/, ''

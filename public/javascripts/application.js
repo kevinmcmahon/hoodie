@@ -6,5 +6,8 @@ $(document).ready(function() {
 	  .not("a[href*='" + hostname + "']")
 	  .addClass('link external')
 	  .attr('target', '_blank');
-
+	
+	$('#btnLookupLocation').click(function(){
+		Location.loadLocation();
+	});
 });

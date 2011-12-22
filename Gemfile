@@ -16,3 +16,4 @@ gem "sinatra-config-file"
 gem "rdiscount"
 gem 'heroku'
 gem 'geocoder'
+gem 'awesome_print'

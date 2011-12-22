@@ -5,19 +5,8 @@ var Location = {
    
 	loadLocation: function() {
 		if(navigator.geolocation) {
-
-           if($.cookie("posLat")) {
-               latitude = $.cookie("posLat");
-               longitude = $.cookie("posLon");
-               accuracy = $.cookie("posAccuracy");
-               updateDisplay();
-           } else {
-               navigator.geolocation.getCurrentPosition(
-                                   	this.success_handler, 
-									this.error_handler, 
-									{timeout:10000});
-           }
-       }
+			navigator.geolocation.getCurrentPosition(this.success_handler, this.error_handler, {timeout:10000});
+        }
    },
 
    success_handler: function (position) {
@@ -29,16 +18,16 @@ var Location = {
            return;
        }
        
-       this.updateDisplay();
-       
-       $.cookie("posLat", latitude);
-       $.cookie("posLon", longitude);
-       $.cookie("posAccuracy", accuracy);
-     
+       Location.updateDisplay();
    },
    
    updateDisplay: function () {               
-       document.getElementById("address").innerHTML = latitude + ',' + longitude;
+       // $.getJSON('/lookup?lat='+ latitude +'&lng='+ longitude, function(data) {
+       // 	    console.log(data);
+       // 	    $('#ward').html(data.ward);
+       // 	    $('#alderman').html(data.alderman);
+       // 	  });
+       window.location='/hood?lat='+ latitude +'&lng='+ longitude;
    },
    
    error_handler: function error_handler(error) {
@@ -59,9 +48,4 @@ var Location = {
            break;
        }
    },
-   
-   clear_cookies: function () {
-       $.cookie('posLat', null);
-       document.getElementById("status").innerHTML = "Cookies cleared.";
-   }
 }

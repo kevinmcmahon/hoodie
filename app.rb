@@ -2,11 +2,11 @@ require 'rubygems'
 require 'sinatra'
 require 'sinatra/flash'
 require 'haml'
-require 'border_patrol'
 require 'pony'
 require 'json'
 require 'data_mapper'
 require 'sinatra/config_file'
+require 'awesome_print'
 
 # Helpers
 require './lib/render_partial'
@@ -21,7 +21,8 @@ set :views, 'views'
 set :public, 'public'
 set :haml, {:format => :html5} # default Haml format is :xhtml
 
-DataMapper::setup(:default, ENV['DATABASE_URL'] || "postgres://localhost:5432/chicago_db")
+#DataMapper::setup(:default, ENV['DATABASE_URL'] || "postgres://localhost:5432/chicago_db")
+DataMapper::setup(:default,"postgres://kmcmahon:0c791fd488@beta.spacialdb.com:9999/spacialdb_1321928742fe_kmcmahon")
     
 config_file "settings.yml"
 
@@ -40,10 +41,9 @@ get '/contact/?' do
   haml :contact, :layout => :'layouts/page'
 end
 
-post '/' do
-  @address = params[:address]
+get '/hood' do
+  @hood_result = params[:address].nil? ? MapHacks.processLatLong(params[:lat],params[:lng]) : MapHacks.processQuery(params[:address])
   
-  @hood_result = MapHacks.processQuery(@address)
   if @hood_result['status'] == :found
     haml :hood, :layout => :'layouts/map'
   else
@@ -67,6 +67,22 @@ get '/lookup/:address' do
     content_type :json
     {:status => 'failed' }.to_json
   end
+end
+
+get '/ward?' do
+   haml :ward, :layout => :'layouts/page'
+end 
+
+get '/lookupward' do
+  @lat = params['lat']
+  @lng = params['lng']
+  puts 'Latitude  : ' + @lat
+  puts 'Longitude : ' + @lng
+  
+  @ward = MapHacks.getWard(@lat,@lng)
+  ap @ward
+  content_type :json
+  { ward:@ward['ward'],alderman:@ward['alderman']}.to_json
 end
 
 get '/lookup' do
