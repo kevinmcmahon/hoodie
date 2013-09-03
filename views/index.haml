@@ -1,8 +1,6 @@
-.row
-  .span14
-    %form{ :id => "address_form", :action => "/hood", :method => "get"}
-      %p
-        %input{:type => "text", :name => "address", :class => "span14", :placeholder => "Enter a Chicago Address"}
-      %p
-        %input{:type => "submit", :value => "Look Up", :class => "btn primary"}
-        %input{:type => "button", :value => "Get Current Location", :class => "btn default", :id =>"btnLookupLocation"}
+.span12
+  %form{ :id => "address_form", :action => "/hood", :method => "get"}
+    %input{:type => "text", :name => "address", :placeholder => "Enter a Chicago Address"}
+    %p
+      %input{:type => "submit", :value => "Look Up", :class => "btn primary"}
+      %input{:type => "button", :value => "Get Current Location", :class => "btn default", :id =>"btnLookupLocation"}

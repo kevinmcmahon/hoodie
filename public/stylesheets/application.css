@@ -156,7 +156,7 @@ body ul li a:hover {
   width: 100%;
 }
 
-#address_form fieldset label {
+#address_form input label {
   display: block;
   font-size: 30px;
   font-weight: bold;
@@ -166,7 +166,7 @@ body ul li a:hover {
   text-shadow: 0 1px 1px #fff;
 }
 
-#address_form fieldset input[type="text"] {
+#address_form input input[type="text"] {
 	width: 100%;
 	padding: 5px 8px;
 	font-size: 1.2em;

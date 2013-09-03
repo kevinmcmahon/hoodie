@@ -7,7 +7,7 @@ module MapHacks
     
     def self.in_chicago?(lat,lng)
       sql = 
-      "SELECT EXISTS(SELECT * FROM boundary WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326)));"
+      "SELECT EXISTS(SELECT * FROM boundary WHERE ST_Contains(geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326)));"
 
       result = DataMapper.repository(:default).adapter.select sql
       result[0]
@@ -17,7 +17,7 @@ module MapHacks
       sql =  
       "SELECT pri_neigh AS neighborhood 
       FROM hoods 
-      WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326))
+      WHERE ST_Contains(geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326))
       LIMIT 1;"
 
       result = DataMapper.repository(:default).adapter.select sql
@@ -26,7 +26,7 @@ module MapHacks
     
     def self.getWard(lat,lng)
       sql =  "SELECT ward, alderman, ward_phone, hall_phone, address AS ward_address, hall_offic AS hall_address FROM wards 
-      WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326))
+      WHERE ST_Contains(geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326))
       LIMIT 1;"
 
       result = DataMapper.repository(:default).adapter.select sql
@@ -38,7 +38,7 @@ module MapHacks
       "SELECT police_stations.name AS district FROM police_stations
        INNER JOIN police_districts
        ON police_districts.dist_num = police_stations.descriptio
-       WHERE ST_Contains(police_districts.the_geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326));"
+       WHERE ST_Contains(police_districts.geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326));"
 
        result = DataMapper.repository(:default).adapter.select sql
        result[0]
@@ -47,7 +47,7 @@ module MapHacks
     def self.getIlCongress(lat,lng)
       sql = 
       "SELECT district FROM il_congress
-       WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326));"
+       WHERE ST_Contains(geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326));"
 
        result = DataMapper.repository(:default).adapter.select sql 
        result[0]
@@ -55,7 +55,7 @@ module MapHacks
 
     def self.getIlSenate(lat,lng)
       sql = "SELECT district FROM il_senate
-             WHERE ST_Contains(the_geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326));"
+             WHERE ST_Contains(geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326));"
 
       result = DataMapper.repository(:default).adapter.select sql
       result[0]
