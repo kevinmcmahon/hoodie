@@ -35,9 +35,7 @@ module MapHacks
     
     def self.getPoliceDistrict(lat,lng)
       sql = 
-      "SELECT police_stations.name AS district FROM police_stations
-       INNER JOIN police_districts
-       ON police_districts.dist_num = police_stations.descriptio
+      "SELECT police_districts.dist_num FROM police_districts
        WHERE ST_Contains(police_districts.geom,ST_GeomFromText('POINT(#{lng} #{lat})', 4326));"
 
        result = DataMapper.repository(:default).adapter.select sql

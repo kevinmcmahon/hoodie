@@ -94,8 +94,14 @@ get '/lookup' do
   if @hood_result['status'] == :found  
     content_type :json
     { :status => 'success', :ward => @hood_result['ward'], :hood => @hood_result['hood'],
-      :address => @hood_result['formatted_address'], :lat => @hood_result['lat'].to_s, :long => @hood_result['lng'].to_s, 
-      :police => @hood_result['police'], :ushouse => @hood_result['ushouse'], :ilsenate => @hood_result['ilsenate']}.to_json
+      :address => @hood_result['formatted_address'],
+      :coordinates => {      
+      :lat => @hood_result['lat'].to_s, 
+      :long => @hood_result['lng'].to_s}, 
+      :police => @hood_result['police'],
+      :ushouse => @hood_result['ushouse'],
+      :ilsenate => @hood_result['ilsenate']
+    }.to_json
   else
     content_type :json
     {:status => 'failed' }.to_json
