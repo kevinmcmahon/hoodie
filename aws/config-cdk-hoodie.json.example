@@ -1,0 +1,5 @@
+{
+    "certificateArn": "YOUR_CERTIFICATE_ARN_HERE",
+    "domainNames": "exampledomain.com",
+    "resourcePrefix": "example-prefix"
+}

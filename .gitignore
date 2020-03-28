@@ -9,7 +9,7 @@ aws/**/*.d.ts
 .cdk.staging
 cdk.out
 
-config-cdk-bikeracks.json
+config-cdk-hoodie.json
 
 
 # local env files
