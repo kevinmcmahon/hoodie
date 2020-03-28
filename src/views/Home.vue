@@ -25,11 +25,11 @@ export default {
   methods: {
     searchByLatLng: async function() {
         this.getLocation(position => { 
-            this.$router.push({ path: 'bikeracks', query: { lat: position.latitude, lng: position.longitude } });
+            this.$router.push({ path: 'location', query: { lat: position.latitude, lng: position.longitude } });
         });
     },
     searchByAddress: async function() {
-        this.$router.push({ path: 'bikeracks', query: { address: this.searchQuery }})
+        this.$router.push({ path: 'location', query: { address: this.searchQuery }})
     },
     getLocation: function(callback) {
         if (navigator.geolocation) {
